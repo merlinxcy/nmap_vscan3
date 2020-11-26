@@ -1,5 +1,5 @@
 #! coding:utf-8
-# Author: xcy
+# Author: xuchenyi
 # 使用nmap自带的指纹去除nmap特征后进行服务识别,识别思路是先进行一次socket连接,接受服务器的welcome banner
 # 如果welcome banner在设置的一定时间内没有收到,那么根据常见端口发送探测报文
 # 如果还是没有根据nmap probe中的数据逐条发送数据
@@ -662,8 +662,16 @@ class ServiceScan():
             if "ports" in probe:
                 ports = probe['ports']['ports']
                 if self.is_port_in_range(port, ports):
+                    if not probe.get('rarity'):
+                        probe['rarity'] = {
+                            'rarity' : 0
+                        }
                     included.append(probe)
                 else:  # exclude ports
+                    if not probe.get('rarity'):
+                        probe['rarity'] = {
+                            'rarity' : 0
+                        }
                     excluded.append(probe)
 
             elif "sslports" in probe:
@@ -676,8 +684,8 @@ class ServiceScan():
             else:  # no [ports, sslports] settings
                 excluded.append(probe)
         # 利用lamda排序,根据端口的稀有度来,稀有度高的可信度高,就提前扫描
-        # included = sorted(included,reverse=True,key=lambda x:(x['rarity']['rarity']))
-        # excluded = sorted(excluded,reverse=True,key=lambda x:(x['rarity']['rarity']))
+        included = sorted(included,reverse=True,key=lambda x:(x['rarity']['rarity']))
+        excluded = sorted(excluded,reverse=True,key=lambda x:(x['rarity']['rarity']))
         return included, excluded
 
     def is_port_in_range(self, port, nmap_port_rule):
@@ -698,9 +706,9 @@ class ServiceScan():
         return bret
 
 
+
+
 import sys
 
 print(sys.argv)
 print(ServiceScan().scan(sys.argv[1],sys.argv[2],'tcp'))
-
-
