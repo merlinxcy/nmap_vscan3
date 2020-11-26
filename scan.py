@@ -683,7 +683,7 @@ class ServiceScan():
     def is_port_in_range(self, port, nmap_port_rule):
         """Check port if is in nmap port range
         """
-        bret = Falses
+        bret = False
 
         ports = nmap_port_rule.split(',')  # split into serval string parts
         if str(port) in ports:
